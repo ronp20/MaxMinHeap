@@ -49,6 +49,12 @@ public:
                     lesser);
         }
     }
+
+    static void Insert(std::vector<int>& heap, int key)
+    {
+        heap.push_back(key);
+        PushUp(heap, (heap.size() - 1));
+    }
     
 private:
     static void PushDownMin(
@@ -191,6 +197,60 @@ private:
         }
     }
 
+    static void PushUp(std::vector<int>& heap, size_t index)
+    {
+        if (index != 0)
+        {
+            auto indexParent = GetParentIndex(index);
+
+            if (IsMaxLevel(index))
+            {
+                if (heap[index] < heap[indexParent])
+                {
+                    std::swap(heap[index], heap[indexParent]);
+                    PushUpMin(heap, indexParent);
+                }
+                else
+                {
+                    PushUpMax(heap, index);
+                }
+            }
+            else
+            {
+                if (heap[index] > heap[indexParent])
+                {
+                    std::swap(heap[index], heap[indexParent]);
+                    PushUpMax(heap, indexParent);
+                }
+                else
+                {
+                    PushUpMin(heap, index);
+                }
+
+            }
+        }
+    }
+
+    static void PushUpMin(std::vector<int>& heap, size_t index)
+    {
+        auto indexGrandParent = GetParentIndex(GetParentIndex(index));
+        if (IsIndexExists(heap, indexGrandParent) && heap[index] < heap[indexGrandParent])
+        {
+            std::swap(heap[index], heap[indexGrandParent]);
+            PushUpMin(heap, indexGrandParent);
+        }
+    }
+
+    static void PushUpMax(std::vector<int>& heap, size_t index)
+    {
+        auto indexGrandParent = GetParentIndex(GetParentIndex(index));
+        if (IsIndexExists(heap, indexGrandParent) && heap[index] > heap[indexGrandParent])
+        {
+            std::swap(heap[index], heap[indexGrandParent]);
+            PushUpMax(heap, indexGrandParent);
+        }
+    }
+
     static inline size_t DepthFromIndex(size_t index)
     {
         return floor(log2(++index));
@@ -227,6 +287,11 @@ private:
         return (index < heap.size());
     }
 
+    static inline bool IsMaxLevel(size_t index)
+    {
+        return (DepthFromIndex(index) % 2 == 0);
+    }
+
 //    std::vector<int> _heap;
 };
 
@@ -235,12 +300,14 @@ int main()
     std::cout << "Hello world!" << std::endl;
 //    std::vector<int> vec {8, 71, 41, 31, 10, 11, 16, 46, 51, 31, 21, 13};
 //    std::vector<int> vec {11, 71, 21, 31, 51, 8, 16, 46, 10, 31, 41, 13}; // 71 10 8 46 51 21 16 31 11 31 41 13
-    std::vector<int> vec {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}; //12 2 1 9 11 6 7 8 4 10 5 3
+    std::vector<int> vec {1, 2, 3, 4}; //12 2 1 9 11 6 7 8 4 10 5 3
 
 //    MaxMinHeap heap(std::move(vec));
 //    heap.PushDown(5);
     MaxMinHeap::build(vec);
     MaxMinHeap::PrintHeap(vec);
-
+    MaxMinHeap::Insert(vec, 40);
+    MaxMinHeap::Insert(vec, 40);
+    MaxMinHeap::PrintHeap(vec);
     return 0;
 }
