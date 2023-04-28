@@ -9,28 +9,28 @@ using namespace std;
 class MaxMinHeap
 {
 public:
-    explicit MaxMinHeap(std::vector<int>&& heap):
-    _heap(std::move(heap))
-    {}
 
-    void build()
+    static void build(std::vector<int>& heap)
     {
-        for (int i = static_cast<int>(_heap.size() / 2); i >= 0; --i)
+        int heapSize = static_cast<int>(heap.size());
+        for (auto i = (heapSize / 2); i >= 0; --i)
         {
-            cout << "Index " << i << endl;
-            PushDown(i);
+            PushDown(heap, i);
         }
     }
 
-    void PrintHeap() const
+    static void PrintHeap(const std::vector<int>& heap)
     {
-        for (auto i = 0; i < _heap.size(); ++i)
+        for (auto i = 0; i < heap.size(); ++i)
         {
-            cout << _heap[i] << " ";
+            cout << heap[i] << " ";
         }
         cout << endl;
     }
-    void PushDown(size_t index)
+
+    static void PushDown(
+            std::vector<int>& heap,
+            size_t index)
     {
         static std::greater_equal<int> bigger;
         static std::less_equal<int> lesser;
@@ -38,20 +38,25 @@ public:
         auto level = DepthFromIndex(index);
         if (level % 2 == 0)
         {
-            PushDownMin(index, bigger);
+            PushDownMin(heap,
+                    index,
+                    bigger);
         }
         else
         {
-            PushDownMin(index, lesser);
+            PushDownMin(heap,
+                    index,
+                    lesser);
         }
     }
     
 private:
-    void PushDownMin(
+    static void PushDownMin(
+            std::vector<int>& heap,
             size_t index,
             std::function<bool (int, int)> comparator)
     {
-        if (!IsIndexExists(index))
+        if (!IsIndexExists(heap, index))
         {
             return;
         }
@@ -67,8 +72,8 @@ private:
             rightChild);
 
         //Check if the node have child's 
-        if (!IsIndexExists(leftChild) &&
-            !IsIndexExists(rightChild))
+        if (!IsIndexExists(heap,leftChild) &&
+            !IsIndexExists(heap, rightChild))
         {
             return;    
         }
@@ -77,15 +82,15 @@ private:
         size_t smallestIndex = index;
         
         isGrandChild = false;
-        if (IsIndexExists(leftChild))
+        if (IsIndexExists(heap, leftChild))
         {
-            smallestIndex = comparator(_heap[leftChild], _heap[index]) ?
+            smallestIndex = comparator(heap[leftChild], heap[index]) ?
                             leftChild : 
                             index;
 
-            if (IsIndexExists(rightChild))
+            if (IsIndexExists(heap, rightChild))
             {
-                smallestIndex = comparator(_heap[rightChild], _heap[smallestIndex]) ?
+                smallestIndex = comparator(heap[rightChild], heap[smallestIndex]) ?
                                 rightChild : 
                                 smallestIndex;
             }
@@ -100,18 +105,18 @@ private:
                 leftGrandChildRight);
 
 
-            if (IsIndexExists(leftGrandChildLeft))
+            if (IsIndexExists(heap, leftGrandChildLeft))
             {
-                if (comparator(_heap[leftGrandChildLeft], _heap[smallestIndex]))
+                if (comparator(heap[leftGrandChildLeft], heap[smallestIndex]))
                 {
                     smallestIndex = leftGrandChildLeft;
                     isGrandChild = true;
                 }
 
             }
-            if (IsIndexExists(leftGrandChildRight))
+            if (IsIndexExists(heap, leftGrandChildRight))
             {
-                if (comparator(_heap[leftGrandChildRight], _heap[smallestIndex]))
+                if (comparator(heap[leftGrandChildRight], heap[smallestIndex]))
                 {
                     smallestIndex = leftGrandChildRight;
                     isGrandChild = true;
@@ -127,18 +132,18 @@ private:
                 rightChild,
                 rightGrandChildRight);
 
-            if (IsIndexExists(rightGrandChildLeft))
+            if (IsIndexExists(heap, rightGrandChildLeft))
             {
-                if (comparator(_heap[rightGrandChildLeft], _heap[smallestIndex]))
+                if (comparator(heap[rightGrandChildLeft], heap[smallestIndex]))
                 {
                     smallestIndex = rightGrandChildLeft;
                     isGrandChild = true;
                 }
             }
 
-            if (IsIndexExists(rightGrandChildRight))
+            if (IsIndexExists(heap, rightGrandChildRight))
             {
-                if (comparator(_heap[rightGrandChildRight], _heap[smallestIndex]))
+                if (comparator(heap[rightGrandChildRight], heap[smallestIndex]))
                 {
                     smallestIndex = rightGrandChildRight;
                     isGrandChild = true;
@@ -162,27 +167,27 @@ private:
         if (isGrandChild)
         {
 //            cout << "GrandChiled " << endl;
-            if(comparator(_heap[smallestIndex], _heap[index]))
+            if(comparator(heap[smallestIndex], heap[index]))
             {
-                std::swap(_heap[smallestIndex], _heap[index]);
+                std::swap(heap[smallestIndex], heap[index]);
 
                 if (smallestIndex != 0)
                 {
                     auto parentSmllestIndex = GetParentIndex(smallestIndex);
 
-                    if (!comparator(_heap[smallestIndex], _heap[parentSmllestIndex]))
+                    if (!comparator(heap[smallestIndex], heap[parentSmllestIndex]))
                     {
-                        std::swap(_heap[smallestIndex], _heap[parentSmllestIndex]);   
+                        std::swap(heap[smallestIndex], heap[parentSmllestIndex]);
                     }
 
-                    PushDown(smallestIndex);
+                    PushDown(heap, smallestIndex);
                 }
 
             }
         }
-        else if(comparator(_heap[smallestIndex], _heap[index]))
+        else if(comparator(heap[smallestIndex], heap[index]))
         {
-            std::swap(_heap[smallestIndex], _heap[index]);
+            std::swap(heap[smallestIndex], heap[index]);
         }
     }
 
@@ -215,12 +220,14 @@ private:
         rightChildIndex = (index * 2) + 2;
     }
 
-    bool inline IsIndexExists(size_t index) const
+    static bool inline IsIndexExists(
+            const std::vector<int>& heap,
+            size_t index)
     {
-        return (index < _heap.size());
+        return (index < heap.size());
     }
 
-    std::vector<int> _heap;
+//    std::vector<int> _heap;
 };
 
 int main() 
@@ -228,12 +235,12 @@ int main()
     std::cout << "Hello world!" << std::endl;
 //    std::vector<int> vec {8, 71, 41, 31, 10, 11, 16, 46, 51, 31, 21, 13};
 //    std::vector<int> vec {11, 71, 21, 31, 51, 8, 16, 46, 10, 31, 41, 13}; // 71 10 8 46 51 21 16 31 11 31 41 13
-//    std::vector<int> vec {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}; //12 2 1 9 11 6 7 8 4 10 5 3
+    std::vector<int> vec {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}; //12 2 1 9 11 6 7 8 4 10 5 3
 
-    MaxMinHeap heap(std::move(vec));
+//    MaxMinHeap heap(std::move(vec));
 //    heap.PushDown(5);
-    heap.build();
-    heap.PrintHeap();
+    MaxMinHeap::build(vec);
+    MaxMinHeap::PrintHeap(vec);
 
     return 0;
 }
