@@ -4,7 +4,6 @@
 #include <vector>
 #include <functional>
 
-constexpr int HEAP_MAX_CAPACITY = 100;
 using namespace std;
 class MaxMinHeap
 {
@@ -65,6 +64,75 @@ public:
             PushDown(heap, index);
             PushUp(heap,index);
         }
+    }
+
+    static bool ExtractMax(
+            std::vector<int>& heap,
+            int& max)
+    {
+        auto retValue{true};
+        if (heap.size() != 0)
+        {
+            max = heap[0];
+            std::swap(heap[0], heap[heap.size() - 1]);
+            heap.pop_back();
+            PushDown(heap, 0);
+        }
+        else
+        {
+            cout << "Cannot Extract Max, Heap Is Empty" << endl;
+            retValue = false;
+        }
+
+        return retValue;
+    }
+
+    static bool ExtractMin(
+            std::vector<int>& heap,
+            int& min)
+    {
+        auto retValue{true};
+        auto heapSize = heap.size();
+
+        if (heapSize != 0)
+        {
+            size_t minIndex;
+
+            if (heapSize == 1)
+            {
+                minIndex = 0;
+                min = heap[0];
+            }
+            else if (heapSize == 2)
+            {
+                minIndex = 1;
+                min = heap[1];
+            }
+            else
+            {
+                if (heap[1] < heap[2])
+                {
+                    minIndex = 1;
+                    min = heap[1];
+                }
+                else
+                {
+                    minIndex = 2;
+                    min = heap[2];
+                }
+            }
+
+            std::swap(heap[minIndex], heap[heap.size() - 1]);
+            heap.pop_back();
+            PushDown(heap, minIndex);
+        }
+        else
+        {
+            cout << "Cannot Extract Min, Heap Is Empty" << endl;
+            retValue = false;
+        }
+
+        return retValue;
     }
     
 private:
@@ -333,7 +401,21 @@ int main()
 //    MaxMinHeap::Insert(vec, 40);
 //    MaxMinHeap::Insert(vec, 10);
     MaxMinHeap::PrintHeap(vec);
-    MaxMinHeap::Delete(vec, 4 );
-    MaxMinHeap::PrintHeap(vec);
+//    MaxMinHeap::Delete(vec, 4 );
+//    MaxMinHeap::PrintHeap(vec);
+
+    int max, min;
+    if (MaxMinHeap::ExtractMax(vec, max))
+    {
+        cout << "Max is " << max << endl;
+        MaxMinHeap::PrintHeap(vec);
+    }
+    if (MaxMinHeap::ExtractMin(vec, min))
+    {
+        cout << "Min is " << min << endl;
+        MaxMinHeap::PrintHeap(vec);
+    }
+
+
     return 0;
 }
