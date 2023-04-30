@@ -55,8 +55,9 @@ public:
         PushUp(heap, (heap.size() - 1));
     }
 
-    static void Delete(std::vector<int>& heap, size_t index)
+    static bool Delete(std::vector<int>& heap, size_t index)
     {
+        auto retValue{true};
         if (IsIndexExists(heap, index))
         {
             std::swap(heap[index], heap[heap.size() - 1]);
@@ -64,6 +65,13 @@ public:
             PushDown(heap, index);
             PushUp(heap,index);
         }
+        else
+        {
+            cout << "Index Is Not In The Heap\n";
+            retValue = false;
+        }
+
+        return retValue;
     }
 
     static bool ExtractMax(
@@ -386,36 +394,140 @@ private:
 //    std::vector<int> _heap;
 };
 
+
+// TODO Change function names
+// TODO make insert generic
+// TODO Verify User input is digit
+
 int main() 
 {
-    std::cout << "Hello world!" << std::endl;
-//    std::vector<int> vec {8, 71, 41, 31, 10, 11, 16, 46, 51, 31, 21, 13};
-    std::vector<int> vec {11, 71, 21, 31, 51, 8, 16, 46, 10, 31, 41, 13}; // 71 10 8 46 51 21 16 31 11 31 41 13
-//    std::vector<int> vec {1, 2, 3, 4}; //12 2 1 9 11 6 7 8 4 10 5 3
-
-//    MaxMinHeap heap(std::move(vec));
-//    heap.PushDown(5);
-    MaxMinHeap::BuildHeap(vec);
-//    MaxMinHeap::PrintHeap(vec);
-//    MaxMinHeap::Insert(vec, 40);
-//    MaxMinHeap::Insert(vec, 40);
-//    MaxMinHeap::Insert(vec, 10);
-    MaxMinHeap::PrintHeap(vec);
-//    MaxMinHeap::Delete(vec, 4 );
-//    MaxMinHeap::PrintHeap(vec);
-
-    int max, min;
-    if (MaxMinHeap::ExtractMax(vec, max))
+    while (true)
     {
-        cout << "Max is " << max << endl;
-        MaxMinHeap::PrintHeap(vec);
-    }
-    if (MaxMinHeap::ExtractMin(vec, min))
-    {
-        cout << "Min is " << min << endl;
-        MaxMinHeap::PrintHeap(vec);
+        cout << "Welcome to Ron Potashnik Max Min Heap\n";
+        cout << "Please enter your array size\n";
+        int inputSize;
+        cin >> inputSize;
+        if (inputSize <= 0)
+        {
+            cout << "Please run the program again with size larger then 0\n";
+            break;
+        }
+
+        std::vector<int> inputVec;
+        cout << "Please enter " << inputSize << " numbers\n";
+        for (auto i = 0; i < inputSize; ++i)
+        {
+            int inputNumber;
+            cin >> inputNumber;
+            inputVec.push_back(inputNumber);
+        }
+
+        cout << "\nYour input array is:\n";
+        MaxMinHeap::PrintHeap(inputVec);
+
+        cout << "\nPlease enter:\n"
+                "1 - if you want to build MaxMin Heap from your array\n"
+                "Any other value for for exit\n";
+        int inputSelect;
+        cin >> inputSelect;
+        if (inputSelect == 1)
+        {
+            MaxMinHeap::BuildHeap(inputVec);
+//            cout << "Your MaxMin Heap is:\n";
+//            MaxMinHeap::PrintHeap(inputVec);
+            while (true)
+            {
+                cout << "\nYour MaxMin Heap is:\n";
+                MaxMinHeap::PrintHeap(inputVec);
+
+                cout << "\nPlease enter:\n"
+                        "1 - Heap Extract Max\n"
+                        "2 - Heap Extract Min\n"
+                        "3 - Heap Insert\n"
+                        "4 - Heap Delete\n"
+                        "Any other value for for exit\n";
+                cin >> inputSelect;
+
+                // Heap Extract Max
+                if (inputSelect == 1)
+                {
+                    cout << "\nYou selected Heap Extract Max\n";
+                    int max;
+                    if (MaxMinHeap::ExtractMax(inputVec, max))
+                    {
+                        cout << "Max value was " << max << endl;
+//                        cout << "Your MaxMin Heap is:\n";
+//                        MaxMinHeap::PrintHeap(inputVec);
+                    }
+                    else
+                    {
+                        cout << "Please Try Again\n";
+                    }
+
+                    continue;
+                }
+                // Heap Extract Min
+                else if (inputSelect == 2)
+                {
+                    cout << "\nYou selected Heap Extract Min\n";
+                    int min;
+                    if (MaxMinHeap::ExtractMin(inputVec, min))
+                    {
+                        cout << "Min value was " << min << endl;
+//                        cout << "Your MaxMin Heap is:\n";
+//                        MaxMinHeap::PrintHeap(inputVec);
+                    }
+                    else
+                    {
+                        cout << "Please Try Again\n";
+                    }
+
+                    continue;
+                }
+                //Heap Insert
+                else if (inputSelect == 3)
+                {
+                    cout << "\nYou selected Heap Insert\n";
+                    cout << "Please Insert The Value You Want To Insert\n";
+                    int inputInsert;
+                    cin >> inputInsert;
+                    MaxMinHeap::Insert(inputVec, inputInsert);
+//                    cout << "Your MaxMin Heap is:\n";
+//                    MaxMinHeap::PrintHeap(inputVec);
+                    continue;
+                }
+                //Heap Delete
+                else if (inputSelect == 4)
+                {
+                    cout << "\nYou selected Heap Delete\n";
+                    cout << "Please Insert The Index You Want To Delete\n";
+                    int inputIndex;
+                    cin >> inputIndex;
+                    if (!MaxMinHeap::Delete(inputVec, inputIndex))
+                    {
+                        if (inputVec.size() == 0)
+                        {
+                            cout << "The Heap Is Empty\n";
+                        }
+                        cout << "Please Try Again\n";
+                    }
+
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            break;
+        }
+        else
+        {
+            break;
+        }
     }
 
-
+    cout << "Goodbye!\n";
     return 0;
 }
