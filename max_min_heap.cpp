@@ -14,7 +14,7 @@ public:
         int heapSize = static_cast<int>(heap.size());
         for (auto i = (heapSize / 2); i >= 0; --i)
         {
-            PushDown(heap, i);
+            Heapify(heap, i);
         }
     }
 
@@ -27,7 +27,7 @@ public:
         cout << endl;
     }
 
-    static void PushDown(
+    static void Heapify(
             std::vector<int>& heap,
             size_t index)
     {
@@ -37,13 +37,13 @@ public:
         auto level = DepthFromIndex(index);
         if (level % 2 == 0)
         {
-            PushDownMin(heap,
+            PushDown(heap,
                     index,
                     bigger);
         }
         else
         {
-            PushDownMin(heap,
+            PushDown(heap,
                     index,
                     lesser);
         }
@@ -62,7 +62,7 @@ public:
         {
             std::swap(heap[index], heap[heap.size() - 1]);
             heap.pop_back();
-            PushDown(heap, index);
+            Heapify(heap, index);
             PushUp(heap,index);
         }
         else
@@ -84,7 +84,7 @@ public:
             max = heap[0];
             std::swap(heap[0], heap[heap.size() - 1]);
             heap.pop_back();
-            PushDown(heap, 0);
+            Heapify(heap, 0);
         }
         else
         {
@@ -132,7 +132,7 @@ public:
 
             std::swap(heap[minIndex], heap[heap.size() - 1]);
             heap.pop_back();
-            PushDown(heap, minIndex);
+            Heapify(heap, minIndex);
         }
         else
         {
@@ -144,7 +144,7 @@ public:
     }
     
 private:
-    static void PushDownMin(
+    static void PushDown(
             std::vector<int>& heap,
             size_t index,
             std::function<bool (int, int)> comparator)
@@ -242,24 +242,10 @@ private:
                     isGrandChild = true;
                 }
             }
-
-//            cout << "Push Down Min left chiled index " <<  leftChild << endl;
-//            cout << "Push Down Min right chiled index " <<  rightChild << endl;
-//
-//            cout << "Push Down Min left grandchiled left index " << leftGrandChildLeft << endl;
-//            cout << "Push Down Min left grandchiled left index " <<  leftGrandChildRight << endl;
-//
-//            cout << "Push Down Min right grandchiled left index " << rightGrandChildLeft << endl;
-//            cout << "Push Down Min right grandchiled left index " <<  rightGrandChildRight << endl;
-//
-//            cout << "Push Down Min right smallest index " <<  smallestIndex << endl;
-//            PrintHeap();
-
         }
 
         if (isGrandChild)
         {
-//            cout << "GrandChiled " << endl;
             if(comparator(heap[smallestIndex], heap[index]))
             {
                 std::swap(heap[smallestIndex], heap[index]);
@@ -273,7 +259,7 @@ private:
                         std::swap(heap[smallestIndex], heap[parentSmllestIndex]);
                     }
 
-                    PushDown(heap, smallestIndex);
+                    Heapify(heap, smallestIndex);
                 }
 
             }
@@ -390,8 +376,6 @@ private:
     {
         return (index == 0);
     }
-
-//    std::vector<int> _heap;
 };
 
 
@@ -433,8 +417,6 @@ int main()
         if (inputSelect == 1)
         {
             MaxMinHeap::BuildHeap(inputVec);
-//            cout << "Your MaxMin Heap is:\n";
-//            MaxMinHeap::PrintHeap(inputVec);
             while (true)
             {
                 cout << "\nYour MaxMin Heap is:\n";
@@ -445,6 +427,7 @@ int main()
                         "2 - Heap Extract Min\n"
                         "3 - Heap Insert\n"
                         "4 - Heap Delete\n"
+                        "5 - Heap Heapify\n"
                         "Any other value for for exit\n";
                 cin >> inputSelect;
 
@@ -456,8 +439,6 @@ int main()
                     if (MaxMinHeap::ExtractMax(inputVec, max))
                     {
                         cout << "Max value was " << max << endl;
-//                        cout << "Your MaxMin Heap is:\n";
-//                        MaxMinHeap::PrintHeap(inputVec);
                     }
                     else
                     {
@@ -474,8 +455,6 @@ int main()
                     if (MaxMinHeap::ExtractMin(inputVec, min))
                     {
                         cout << "Min value was " << min << endl;
-//                        cout << "Your MaxMin Heap is:\n";
-//                        MaxMinHeap::PrintHeap(inputVec);
                     }
                     else
                     {
@@ -492,15 +471,13 @@ int main()
                     int inputInsert;
                     cin >> inputInsert;
                     MaxMinHeap::Insert(inputVec, inputInsert);
-//                    cout << "Your MaxMin Heap is:\n";
-//                    MaxMinHeap::PrintHeap(inputVec);
                     continue;
                 }
                 //Heap Delete
                 else if (inputSelect == 4)
                 {
                     cout << "\nYou selected Heap Delete\n";
-                    cout << "Please Insert The Index You Want To Delete\n";
+                    cout << "Please Insert The Index You Want To Delete(Heap Index Start From 0)\n";
                     int inputIndex;
                     cin >> inputIndex;
                     if (!MaxMinHeap::Delete(inputVec, inputIndex))
@@ -509,6 +486,25 @@ int main()
                         {
                             cout << "The Heap Is Empty\n";
                         }
+                        cout << "Please Try Again\n";
+                    }
+
+                    continue;
+                }
+                //Heap Heapify
+                else if (inputSelect == 5)
+                {
+                    cout << "\nYou selected Heap Heapify\n";
+                    cout << "Please Insert The Index You Want To Heapify(Heap Index Start From 0)\n";
+                    int inputIndex;
+                    cin >> inputIndex;
+                    if (!inputIndex >= inputVec.size())
+                    {
+                        MaxMinHeap::Heapify(inputVec, inputIndex);
+                    }
+                    else
+                    {
+                        cout << "The index " << inputIndex << " is not in the heap\n";
                         cout << "Please Try Again\n";
                     }
 
