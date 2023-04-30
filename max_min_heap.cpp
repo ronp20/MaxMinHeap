@@ -142,7 +142,7 @@ public:
 
         return retValue;
     }
-    
+
 private:
     static void PushDown(
             std::vector<int>& heap,
@@ -381,7 +381,6 @@ private:
 
 // TODO Change function names
 // TODO make insert generic
-// TODO Verify User input is digit
 
 int main() 
 {
@@ -391,19 +390,46 @@ int main()
         cout << "Please enter your array size\n";
         int inputSize;
         cin >> inputSize;
+        if (!cin)
+        {
+            cout << "Please enter a valid number\n";
+            cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            cin >> inputSize;
+        }
+
+        if (!cin)
+        {
+            cout << "Next time please enter valid number\n";
+            break;
+        }
+
         if (inputSize <= 0)
         {
             cout << "Please run the program again with size larger then 0\n";
             break;
         }
 
+        auto validInput{true};
         std::vector<int> inputVec;
         cout << "Please enter " << inputSize << " numbers\n";
         for (auto i = 0; i < inputSize; ++i)
         {
             int inputNumber;
             cin >> inputNumber;
+            if (!cin)
+            {
+                cout << "Next time please enter valid number\n";
+                validInput = false;
+                break;
+            }
+
             inputVec.push_back(inputNumber);
+        }
+
+        if (!validInput)
+        {
+            break;
         }
 
         cout << "\nYour input array is:\n";
@@ -470,6 +496,11 @@ int main()
                     cout << "Please Insert The Value You Want To Insert\n";
                     int inputInsert;
                     cin >> inputInsert;
+                    if (!cin)
+                    {
+                        cout << "Next time please enter valid number\n";
+                        break;
+                    }
                     MaxMinHeap::Insert(inputVec, inputInsert);
                     continue;
                 }
@@ -477,9 +508,14 @@ int main()
                 else if (inputSelect == 4)
                 {
                     cout << "\nYou selected Heap Delete\n";
-                    cout << "Please Insert The Index You Want To Delete(Heap Index Start From 0)\n";
+                    cout << "Please Insert The Index You Want To Delete - Range From 0 To " << inputVec.size() - 1 << endl;
                     int inputIndex;
                     cin >> inputIndex;
+                    if (!cin)
+                    {
+                        cout << "Next time please enter valid number\n";
+                        break;
+                    }
                     if (!MaxMinHeap::Delete(inputVec, inputIndex))
                     {
                         if (inputVec.size() == 0)
@@ -495,9 +531,14 @@ int main()
                 else if (inputSelect == 5)
                 {
                     cout << "\nYou selected Heap Heapify\n";
-                    cout << "Please Insert The Index You Want To Heapify(Heap Index Start From 0)\n";
+                    cout << "Please Insert The Index You Want To Heapify - Range From 0 To " << inputVec.size() - 1 << endl;
                     int inputIndex;
                     cin >> inputIndex;
+                    if (!cin)
+                    {
+                        cout << "Next time please enter valid number\n";
+                        break;
+                    }
                     if (!inputIndex >= inputVec.size())
                     {
                         MaxMinHeap::Heapify(inputVec, inputIndex);
