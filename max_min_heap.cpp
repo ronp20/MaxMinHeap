@@ -9,6 +9,11 @@ class MaxMinHeap
 {
 public:
 
+    /**
+     * BuildHeap - Build max min heap from a vector
+     * The function is looping from last node to the root and Heapify each node
+     * @param heap - an unsorted array
+     */
     static void BuildHeap(std::vector<int>& heap)
     {
         int heapSize = static_cast<int>(heap.size());
@@ -18,6 +23,10 @@ public:
         }
     }
 
+    /**
+     * PrintHeap
+     * @param heap
+     */
     static void PrintHeap(const std::vector<int>& heap)
     {
         for (auto i = 0; i < heap.size(); ++i)
@@ -27,43 +36,51 @@ public:
         cout << endl;
     }
 
+    /**
+     * Heapify
+     * @param heap
+     * @param index
+     */
     static void Heapify(
             std::vector<int>& heap,
             size_t index)
     {
-        static std::greater_equal<int> bigger;
-        static std::less_equal<int> lesser;
-
-        auto level = DepthFromIndex(index);
-        if (level % 2 == 0)
+        if (IsMaxLevel(index))
         {
-            PushDown(heap,
-                    index,
-                    bigger);
+            PushDown(heap, index, bigger);
         }
         else
         {
-            PushDown(heap,
-                    index,
-                    lesser);
+            PushDown(heap, index, lesser);
         }
     }
 
+    /**
+     * Insert
+     * @param heap
+     * @param key
+     */
     static void Insert(std::vector<int>& heap, int key)
     {
         heap.push_back(key);
         PushUp(heap, (heap.size() - 1));
     }
 
+    /**
+     * Delete
+     * @param heap
+     * @param index
+     * @return
+     */
     static bool Delete(std::vector<int>& heap, size_t index)
     {
         auto retValue{true};
         if (IsIndexExists(heap, index))
         {
-            std::swap(heap[index], heap[heap.size() - 1]);
-            heap.pop_back();
-            Heapify(heap, index);
-            PushUp(heap,index);
+            heap[index] = heap[0];
+            PushUp(heap, index);
+            int max;
+            ExtractMax(heap, max);
         }
         else
         {
@@ -74,6 +91,12 @@ public:
         return retValue;
     }
 
+    /**
+     * ExtractMax
+     * @param heap
+     * @param max
+     * @return
+     */
     static bool ExtractMax(
             std::vector<int>& heap,
             int& max)
@@ -130,6 +153,7 @@ public:
                 }
             }
 
+            cout << "Min index " << minIndex << endl;
             std::swap(heap[minIndex], heap[heap.size() - 1]);
             heap.pop_back();
             Heapify(heap, minIndex);
@@ -144,10 +168,7 @@ public:
     }
 
 private:
-    static void PushDown(
-            std::vector<int>& heap,
-            size_t index,
-            std::function<bool (int, int)> comparator)
+    static void PushDown(std::vector<int>& heap, size_t index, std::function<bool (int, int)> comparator)
     {
         if (!IsIndexExists(heap, index))
         {
@@ -189,13 +210,9 @@ private:
             }
 
             size_t leftGrandChildLeft, leftGrandChildRight;
-            GetLeftChildIndex(
-                leftChild,
-                leftGrandChildLeft);
+            GetLeftChildIndex( leftChild, leftGrandChildLeft);
 
-            GetRightChildIndex(
-                leftChild,
-                leftGrandChildRight);
+            GetRightChildIndex(leftChild, leftGrandChildRight);
 
 
             if (IsIndexExists(heap, leftGrandChildLeft))
@@ -217,13 +234,9 @@ private:
             }
 
             size_t rightGrandChildLeft, rightGrandChildRight;
-            GetLeftChildIndex(
-                rightChild,
-                rightGrandChildLeft);
+            GetLeftChildIndex(rightChild, rightGrandChildLeft);
 
-            GetRightChildIndex(
-                rightChild,
-                rightGrandChildRight);
+            GetRightChildIndex(rightChild, rightGrandChildRight);
 
             if (IsIndexExists(heap, rightGrandChildLeft))
             {
@@ -281,11 +294,13 @@ private:
                 if (heap[index] < heap[indexParent])
                 {
                     std::swap(heap[index], heap[indexParent]);
-                    PushUpMin(heap, indexParent);
+//                    PushUpMin(heap, indexParent);
+                    BubbleUp(heap, indexParent, lesser);
                 }
                 else
                 {
-                    PushUpMax(heap, index);
+//                    PushUpMax(heap, index);
+                    BubbleUp(heap, index, bigger);
                 }
             }
             else
@@ -293,40 +308,28 @@ private:
                 if (heap[index] > heap[indexParent])
                 {
                     std::swap(heap[index], heap[indexParent]);
-                    PushUpMax(heap, indexParent);
+//                    PushUpMax(heap, indexParent);
+                    BubbleUp(heap, indexParent, bigger);
+
                 }
                 else
                 {
-                    PushUpMin(heap, index);
+                    BubbleUp(heap, index, lesser);
                 }
             }
         }
     }
 
-    static void PushUpMin(std::vector<int>& heap, size_t index)
+    static void BubbleUp(std::vector<int>& heap, size_t index, std::function<bool (int, int)> comparator)
     {
         auto indexParent = GetParentIndex(index);
         if (!IsRoot(indexParent))
         {
             auto indexGrandParent = GetParentIndex(indexParent);
-            if (IsIndexExists(heap, indexGrandParent) && heap[index] < heap[indexGrandParent])
+            if (IsIndexExists(heap, indexGrandParent) && comparator(heap[index], heap[indexGrandParent]))
             {
                 std::swap(heap[index], heap[indexGrandParent]);
-                PushUpMin(heap, indexGrandParent);
-            }
-        }
-    }
-
-    static void PushUpMax(std::vector<int>& heap, size_t index)
-    {
-        auto indexParent = GetParentIndex(index);
-        if (!IsRoot(indexParent))
-        {
-            auto indexGrandParent = GetParentIndex(indexParent);
-            if (IsIndexExists(heap, indexGrandParent) && heap[index] > heap[indexGrandParent])
-            {
-                std::swap(heap[index], heap[indexGrandParent]);
-                PushUpMax(heap, indexGrandParent);
+                BubbleUp(heap, indexGrandParent, comparator);
             }
         }
     }
@@ -376,8 +379,13 @@ private:
     {
         return (index == 0);
     }
+
+    static std::greater_equal<int> bigger;
+    static std::less_equal<int> lesser;
 };
 
+std::greater_equal<int> MaxMinHeap::bigger;
+std::less_equal<int> MaxMinHeap::lesser;
 
 // TODO Change function names
 // TODO make insert generic
