@@ -8,9 +8,8 @@ using namespace std;
 class MaxMinHeap
 {
 public:
-
     /**
-     * BuildHeap - Build max min heap from a vector
+     * BuildHeap - Build max min heap from an unordered vector
      * The function is looping from last node to the root and Heapify each node
      * @param heap - an unsorted array
      */
@@ -24,7 +23,7 @@ public:
     }
 
     /**
-     * PrintHeap
+     * PrintHeap - Printing the heap - for debug session
      * @param heap
      */
     static void PrintHeap(const std::vector<int>& heap)
@@ -37,26 +36,24 @@ public:
     }
 
     /**
-     * Heapify
+     * Heapify - Placed an index in the heap vector using PushDown
      * @param heap
      * @param index
      */
-    static void Heapify(
-            std::vector<int>& heap,
-            size_t index)
+    static void Heapify(std::vector<int>& heap, size_t index)
     {
         if (IsMaxLevel(index))
         {
-            PushDown(heap, index, bigger);
+            PushDown(heap, index, maxComparator);
         }
         else
         {
-            PushDown(heap, index, lesser);
+            PushDown(heap, index, minComparator);
         }
     }
 
     /**
-     * Insert
+     * Insert - Insert a key in an ordered heap
      * @param heap
      * @param key
      */
@@ -67,10 +64,10 @@ public:
     }
 
     /**
-     * Delete
+     * Delete - Delete an index from an ordered heap
      * @param heap
      * @param index
-     * @return
+     * @return false if index is not in the heap
      */
     static bool Delete(std::vector<int>& heap, size_t index)
     {
@@ -92,10 +89,10 @@ public:
     }
 
     /**
-     * ExtractMax
+     * ExtractMax - Extract max value from an ordered heap
      * @param heap
      * @param max
-     * @return
+     * @return false if the heap is empty
      */
     static bool ExtractMax(
             std::vector<int>& heap,
@@ -118,6 +115,12 @@ public:
         return retValue;
     }
 
+    /**
+     * ExtractMin - Extract min value from an ordered heap
+     * @param heap
+     * @param min
+     * @return false if the heap is empty
+     */
     static bool ExtractMin(
             std::vector<int>& heap,
             int& min)
@@ -168,6 +171,12 @@ public:
     }
 
 private:
+    /**
+     * PushDown - Pushing down the index to his placed using comparator function in an ordered heap
+     * @param heap
+     * @param index
+     * @param comparator
+     */
     static void PushDown(std::vector<int>& heap, size_t index, std::function<bool (int, int)> comparator)
     {
         if (!IsIndexExists(heap, index))
@@ -176,36 +185,32 @@ private:
         }
 
         size_t leftChild, rightChild;
-        
-        GetLeftChildIndex(
-            index,
-            leftChild);
 
-        GetRightChildIndex(
-            index,
-            rightChild);
+        GetLeftChildIndex(index, leftChild);
+
+        GetRightChildIndex(index,rightChild);
 
         //Check if the node have child's 
         if (!IsIndexExists(heap,leftChild) &&
             !IsIndexExists(heap, rightChild))
         {
-            return;    
+            return;
         }
-        
-        bool isGrandChild;
+
+        // Find the smallest child or grandchild
+        bool isGrandChild = false;
         size_t smallestIndex = index;
-        
-        isGrandChild = false;
+
         if (IsIndexExists(heap, leftChild))
         {
             smallestIndex = comparator(heap[leftChild], heap[index]) ?
-                            leftChild : 
+                            leftChild :
                             index;
 
             if (IsIndexExists(heap, rightChild))
             {
                 smallestIndex = comparator(heap[rightChild], heap[smallestIndex]) ?
-                                rightChild : 
+                                rightChild :
                                 smallestIndex;
             }
 
@@ -283,6 +288,11 @@ private:
         }
     }
 
+    /**
+     * PushUp - Push up the index to his placed using comparator function in an ordered heap
+     * @param heap
+     * @param index
+     */
     static void PushUp(std::vector<int>& heap, size_t index)
     {
         if (!IsRoot(index))
@@ -294,13 +304,11 @@ private:
                 if (heap[index] < heap[indexParent])
                 {
                     std::swap(heap[index], heap[indexParent]);
-//                    PushUpMin(heap, indexParent);
-                    BubbleUp(heap, indexParent, lesser);
+                    BubbleUp(heap, indexParent, minComparator);
                 }
                 else
                 {
-//                    PushUpMax(heap, index);
-                    BubbleUp(heap, index, bigger);
+                    BubbleUp(heap, index, maxComparator);
                 }
             }
             else
@@ -308,13 +316,12 @@ private:
                 if (heap[index] > heap[indexParent])
                 {
                     std::swap(heap[index], heap[indexParent]);
-//                    PushUpMax(heap, indexParent);
-                    BubbleUp(heap, indexParent, bigger);
+                    BubbleUp(heap, indexParent, maxComparator);
 
                 }
                 else
                 {
-                    BubbleUp(heap, index, lesser);
+                    BubbleUp(heap, index, minComparator);
                 }
             }
         }
@@ -349,16 +356,14 @@ private:
         return 0;
     }
 
-    static inline void GetLeftChildIndex(
-        size_t index,
-        size_t& leftChildIndex)
+    static inline void GetLeftChildIndex(size_t index, size_t& leftChildIndex)
     {
         leftChildIndex = (index * 2) + 1;
     }
 
-     static inline void GetRightChildIndex(
-        size_t index,
-        size_t& rightChildIndex)
+    static inline void GetRightChildIndex(
+            size_t index,
+            size_t& rightChildIndex)
     {
         rightChildIndex = (index * 2) + 2;
     }
@@ -380,72 +385,152 @@ private:
         return (index == 0);
     }
 
-    static std::greater_equal<int> bigger;
-    static std::less_equal<int> lesser;
+    std::vector<int> _heap;
+    static std::greater_equal<int> maxComparator;
+    static std::less_equal<int> minComparator;
 };
 
-std::greater_equal<int> MaxMinHeap::bigger;
-std::less_equal<int> MaxMinHeap::lesser;
+std::greater_equal<int> MaxMinHeap::maxComparator;
+std::less_equal<int> MaxMinHeap::minComparator;
 
-// TODO Change function names
-// TODO make insert generic
 
-int main() 
+//////////////////////////// Menu Functions //////////////////////////////////
+void HeapExtractMaxSelection(std::vector<int>& inputVec)
+{
+    cout << "\nYou selected Heap Extract Max\n";
+    int max;
+    if (MaxMinHeap::ExtractMax(inputVec, max))
+    {
+        cout << "Max value was " << max << endl;
+    }
+    else
+    {
+        cout << "Please Try Again\n";
+    }
+}
+
+void HeapExtractMinSelection(std::vector<int>& inputVec)
+{
+    cout << "\nYou selected Heap Extract Min\n";
+    int min;
+    if (MaxMinHeap::ExtractMin(inputVec, min))
+    {
+        cout << "Min value was " << min << endl;
+    }
+    else
+    {
+        cout << "Please Try Again\n";
+    }
+}
+
+void HeapInsertSelection(std::vector<int>& inputVec)
+{
+    cout << "\nYou selected Heap Insert\n";
+    cout << "Please Insert The Value You Want To Insert\n";
+    int inputInsert;
+    cin >> inputInsert;
+    if (!cin)
+    {
+        cout << "Next time please enter valid number\n";
+        return;
+    }
+    MaxMinHeap::Insert(inputVec, inputInsert);
+}
+
+void HeapDeleteSelection(std::vector<int>& inputVec)
+{
+    cout << "\nYou selected Heap Delete\n";
+    cout << "Please Insert The Index You Want To Delete - Range From 0 To " << inputVec.size() - 1 << endl;
+    int inputIndex;
+    cin >> inputIndex;
+    if (!cin)
+    {
+        cout << "Next time please enter valid number\n";
+        return;
+    }
+    if (!MaxMinHeap::Delete(inputVec, inputIndex))
+    {
+        if (inputVec.size() == 0)
+        {
+            cout << "The Heap Is Empty\n";
+        }
+        cout << "Please Try Again\n";
+    }
+}
+
+bool HeapBuildSelection(std::vector<int>& outputVector)
+{
+    cout << "Please enter your array size\n";
+    int inputSize;
+    cin >> inputSize;
+    if (!cin)
+    {
+        cout << "Please enter a valid number\n";
+        cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> inputSize;
+    }
+
+    if (!cin)
+    {
+        cout << "Next time please enter valid number\n";
+        return false;
+    }
+
+    if (inputSize <= 0)
+    {
+        cout << "Please run the program again with size larger then 0\n";
+        return false;
+    }
+
+    auto validInput{true};
+    std::vector<int> inputVec;
+    cout << "Please enter " << inputSize << " numbers\n";
+    for (auto i = 0; i < inputSize; ++i)
+    {
+        int inputNumber;
+        cin >> inputNumber;
+        if (!cin)
+        {
+            cout << "Next time please enter valid number\n";
+            validInput = false;
+            return false;
+        }
+
+        inputVec.push_back(inputNumber);
+    }
+
+    if (!validInput)
+    {
+        return false;
+    }
+
+    cout << "\nYour input array is:\n";
+    MaxMinHeap::PrintHeap(inputVec);
+
+    MaxMinHeap::BuildHeap(inputVec);
+
+    outputVector = std::move(inputVec);
+    return true;
+}
+
+int main()
 {
     while (true)
     {
         cout << "Welcome to Ron Potashnik Max Min Heap\n";
-        cout << "Please enter your array size\n";
-        int inputSize;
-        cin >> inputSize;
-        if (!cin)
-        {
-            cout << "Please enter a valid number\n";
-            cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            cin >> inputSize;
-        }
 
-        if (!cin)
-        {
-            cout << "Next time please enter valid number\n";
-            break;
-        }
-
-        if (inputSize <= 0)
-        {
-            cout << "Please run the program again with size larger then 0\n";
-            break;
-        }
-
-        auto validInput{true};
         std::vector<int> inputVec;
-        cout << "Please enter " << inputSize << " numbers\n";
-        for (auto i = 0; i < inputSize; ++i)
-        {
-            int inputNumber;
-            cin >> inputNumber;
-            if (!cin)
-            {
-                cout << "Next time please enter valid number\n";
-                validInput = false;
-                break;
-            }
 
-            inputVec.push_back(inputNumber);
-        }
-
-        if (!validInput)
+        if(!HeapBuildSelection(inputVec))
         {
             break;
         }
-
-        cout << "\nYour input array is:\n";
-        MaxMinHeap::PrintHeap(inputVec);
 
         cout << "\nPlease enter:\n"
                 "1 - if you want to build MaxMin Heap from your array\n"
                 "Any other value for for exit\n";
+
         int inputSelect;
         cin >> inputSelect;
         if (inputSelect == 1)
@@ -461,103 +546,38 @@ int main()
                         "2 - Heap Extract Min\n"
                         "3 - Heap Insert\n"
                         "4 - Heap Delete\n"
-                        "5 - Heap Heapify\n"
+                        "5 - Heap Build\n"
                         "Any other value for for exit\n";
                 cin >> inputSelect;
 
                 // Heap Extract Max
                 if (inputSelect == 1)
                 {
-                    cout << "\nYou selected Heap Extract Max\n";
-                    int max;
-                    if (MaxMinHeap::ExtractMax(inputVec, max))
-                    {
-                        cout << "Max value was " << max << endl;
-                    }
-                    else
-                    {
-                        cout << "Please Try Again\n";
-                    }
-
-                    continue;
+                    HeapExtractMaxSelection(inputVec);
                 }
                 // Heap Extract Min
                 else if (inputSelect == 2)
                 {
-                    cout << "\nYou selected Heap Extract Min\n";
-                    int min;
-                    if (MaxMinHeap::ExtractMin(inputVec, min))
-                    {
-                        cout << "Min value was " << min << endl;
-                    }
-                    else
-                    {
-                        cout << "Please Try Again\n";
-                    }
-
-                    continue;
+                    HeapExtractMinSelection(inputVec);
                 }
                 //Heap Insert
                 else if (inputSelect == 3)
                 {
-                    cout << "\nYou selected Heap Insert\n";
-                    cout << "Please Insert The Value You Want To Insert\n";
-                    int inputInsert;
-                    cin >> inputInsert;
-                    if (!cin)
-                    {
-                        cout << "Next time please enter valid number\n";
-                        break;
-                    }
-                    MaxMinHeap::Insert(inputVec, inputInsert);
-                    continue;
+                    HeapInsertSelection(inputVec);
                 }
                 //Heap Delete
                 else if (inputSelect == 4)
                 {
-                    cout << "\nYou selected Heap Delete\n";
-                    cout << "Please Insert The Index You Want To Delete - Range From 0 To " << inputVec.size() - 1 << endl;
-                    int inputIndex;
-                    cin >> inputIndex;
-                    if (!cin)
-                    {
-                        cout << "Next time please enter valid number\n";
-                        break;
-                    }
-                    if (!MaxMinHeap::Delete(inputVec, inputIndex))
-                    {
-                        if (inputVec.size() == 0)
-                        {
-                            cout << "The Heap Is Empty\n";
-                        }
-                        cout << "Please Try Again\n";
-                    }
-
-                    continue;
+                    HeapDeleteSelection(inputVec);
                 }
                 //Heap Heapify
                 else if (inputSelect == 5)
                 {
-                    cout << "\nYou selected Heap Heapify\n";
-                    cout << "Please Insert The Index You Want To Heapify - Range From 0 To " << inputVec.size() - 1 << endl;
-                    int inputIndex;
-                    cin >> inputIndex;
-                    if (!cin)
+                    cout << "\nYou selected Heap Build\n";
+                    if (!HeapBuildSelection(inputVec))
                     {
-                        cout << "Next time please enter valid number\n";
                         break;
                     }
-                    if (!inputIndex >= inputVec.size())
-                    {
-                        MaxMinHeap::Heapify(inputVec, inputIndex);
-                    }
-                    else
-                    {
-                        cout << "The index " << inputIndex << " is not in the heap\n";
-                        cout << "Please Try Again\n";
-                    }
-
-                    continue;
                 }
                 else
                 {
