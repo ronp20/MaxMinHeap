@@ -8,17 +8,24 @@ using namespace std;
 class MaxMinHeap
 {
 public:
+    MaxMinHeap() = default;
+    MaxMinHeap(const MaxMinHeap&) = delete;
+    MaxMinHeap(MaxMinHeap&&) = delete;
+    MaxMinHeap& operator=(MaxMinHeap&) = delete;
+    MaxMinHeap& operator=(MaxMinHeap&&) = delete;
+
     /**
      * BuildHeap - Build max min heap from an unordered vector
      * The function is looping from last node to the root and Heapify each node
      * @param heap - an unsorted array
      */
-    static void BuildHeap(std::vector<int>& heap)
+    void BuildHeap(std::vector<int>& heap)
     {
-        int heapSize = static_cast<int>(heap.size());
+        _heap = heap;
+        int heapSize = static_cast<int>(_heap.size());
         for (auto i = (heapSize / 2); i >= 0; --i)
         {
-            Heapify(heap, i);
+            Heapify(i);
         }
     }
 
@@ -26,29 +33,28 @@ public:
      * PrintHeap - Printing the heap - for debug session
      * @param heap
      */
-    static void PrintHeap(const std::vector<int>& heap)
+    void PrintHeap() const
     {
-        for (auto i = 0; i < heap.size(); ++i)
+        for (auto i = 0; i < _heap.size(); ++i)
         {
-            cout << heap[i] << " ";
+            cout << _heap[i] << " ";
         }
         cout << endl;
     }
 
     /**
      * Heapify - Placed an index in the heap vector using PushDown
-     * @param heap
      * @param index
      */
-    static void Heapify(std::vector<int>& heap, size_t index)
+    void Heapify(size_t index)
     {
         if (IsMaxLevel(index))
         {
-            PushDown(heap, index, maxComparator);
+            PushDown(index, maxComparator);
         }
         else
         {
-            PushDown(heap, index, minComparator);
+            PushDown(index, minComparator);
         }
     }
 
@@ -57,10 +63,10 @@ public:
      * @param heap
      * @param key
      */
-    static void Insert(std::vector<int>& heap, int key)
+    void Insert(int key)
     {
-        heap.push_back(key);
-        PushUp(heap, (heap.size() - 1));
+        _heap.push_back(key);
+        PushUp((_heap.size() - 1));
     }
 
     /**
@@ -69,19 +75,28 @@ public:
      * @param index
      * @return false if index is not in the heap
      */
-    static bool Delete(std::vector<int>& heap, size_t index)
+    bool Delete(size_t index)
     {
         auto retValue{true};
-        if (IsIndexExists(heap, index))
+
+        if(!_heap.empty())
         {
-            heap[index] = heap[0];
-            PushUp(heap, index);
-            int max;
-            ExtractMax(heap, max);
+            if (IsIndexExists(index))
+            {
+                _heap[index] = _heap[0];
+                PushUp(index);
+                int max;
+                ExtractMax(max);
+            }
+            else
+            {
+                cout << "Index Is Not In The Heap\n";
+                retValue = false;
+            }
         }
         else
         {
-            cout << "Index Is Not In The Heap\n";
+            cout << "Heap is empty\n";
             retValue = false;
         }
 
@@ -94,17 +109,15 @@ public:
      * @param max
      * @return false if the heap is empty
      */
-    static bool ExtractMax(
-            std::vector<int>& heap,
-            int& max)
+    bool ExtractMax(int& max)
     {
         auto retValue{true};
-        if (heap.size() != 0)
+        if (_heap.size() != 0)
         {
-            max = heap[0];
-            std::swap(heap[0], heap[heap.size() - 1]);
-            heap.pop_back();
-            Heapify(heap, 0);
+            max = _heap[0];
+            std::swap(_heap[0], _heap[_heap.size() - 1]);
+            _heap.pop_back();
+            Heapify(0);
         }
         else
         {
@@ -121,12 +134,10 @@ public:
      * @param min
      * @return false if the heap is empty
      */
-    static bool ExtractMin(
-            std::vector<int>& heap,
-            int& min)
+    bool ExtractMin(int& min)
     {
         auto retValue{true};
-        auto heapSize = heap.size();
+        auto heapSize = _heap.size();
 
         if (heapSize != 0)
         {
@@ -135,31 +146,31 @@ public:
             if (heapSize == 1)
             {
                 minIndex = 0;
-                min = heap[0];
+                min = _heap[0];
             }
             else if (heapSize == 2)
             {
                 minIndex = 1;
-                min = heap[1];
+                min = _heap[1];
             }
             else
             {
-                if (heap[1] < heap[2])
+                if (_heap[1] < _heap[2])
                 {
                     minIndex = 1;
-                    min = heap[1];
+                    min = _heap[1];
                 }
                 else
                 {
                     minIndex = 2;
-                    min = heap[2];
+                    min = _heap[2];
                 }
             }
 
             cout << "Min index " << minIndex << endl;
-            std::swap(heap[minIndex], heap[heap.size() - 1]);
-            heap.pop_back();
-            Heapify(heap, minIndex);
+            std::swap(_heap[minIndex], _heap[_heap.size() - 1]);
+            _heap.pop_back();
+            Heapify(minIndex);
         }
         else
         {
@@ -170,6 +181,11 @@ public:
         return retValue;
     }
 
+    inline size_t GetSize() const
+    {
+        return _heap.size();
+    }
+
 private:
     /**
      * PushDown - Pushing down the index to his placed using comparator function in an ordered heap
@@ -177,9 +193,9 @@ private:
      * @param index
      * @param comparator
      */
-    static void PushDown(std::vector<int>& heap, size_t index, std::function<bool (int, int)> comparator)
+    void PushDown(size_t index, std::function<bool (int, int)> comparator)
     {
-        if (!IsIndexExists(heap, index))
+        if (!IsIndexExists(index))
         {
             return;
         }
@@ -191,8 +207,8 @@ private:
         GetRightChildIndex(index,rightChild);
 
         //Check if the node have child's 
-        if (!IsIndexExists(heap,leftChild) &&
-            !IsIndexExists(heap, rightChild))
+        if (!IsIndexExists(leftChild) &&
+            !IsIndexExists(rightChild))
         {
             return;
         }
@@ -201,15 +217,15 @@ private:
         bool isGrandChild = false;
         size_t smallestIndex = index;
 
-        if (IsIndexExists(heap, leftChild))
+        if (IsIndexExists(leftChild))
         {
-            smallestIndex = comparator(heap[leftChild], heap[index]) ?
+            smallestIndex = comparator(_heap[leftChild], _heap[index]) ?
                             leftChild :
                             index;
 
-            if (IsIndexExists(heap, rightChild))
+            if (IsIndexExists(rightChild))
             {
-                smallestIndex = comparator(heap[rightChild], heap[smallestIndex]) ?
+                smallestIndex = comparator(_heap[rightChild], _heap[smallestIndex]) ?
                                 rightChild :
                                 smallestIndex;
             }
@@ -220,18 +236,18 @@ private:
             GetRightChildIndex(leftChild, leftGrandChildRight);
 
 
-            if (IsIndexExists(heap, leftGrandChildLeft))
+            if (IsIndexExists(leftGrandChildLeft))
             {
-                if (comparator(heap[leftGrandChildLeft], heap[smallestIndex]))
+                if (comparator(_heap[leftGrandChildLeft], _heap[smallestIndex]))
                 {
                     smallestIndex = leftGrandChildLeft;
                     isGrandChild = true;
                 }
 
             }
-            if (IsIndexExists(heap, leftGrandChildRight))
+            if (IsIndexExists(leftGrandChildRight))
             {
-                if (comparator(heap[leftGrandChildRight], heap[smallestIndex]))
+                if (comparator(_heap[leftGrandChildRight], _heap[smallestIndex]))
                 {
                     smallestIndex = leftGrandChildRight;
                     isGrandChild = true;
@@ -243,18 +259,18 @@ private:
 
             GetRightChildIndex(rightChild, rightGrandChildRight);
 
-            if (IsIndexExists(heap, rightGrandChildLeft))
+            if (IsIndexExists(rightGrandChildLeft))
             {
-                if (comparator(heap[rightGrandChildLeft], heap[smallestIndex]))
+                if (comparator(_heap[rightGrandChildLeft], _heap[smallestIndex]))
                 {
                     smallestIndex = rightGrandChildLeft;
                     isGrandChild = true;
                 }
             }
 
-            if (IsIndexExists(heap, rightGrandChildRight))
+            if (IsIndexExists(rightGrandChildRight))
             {
-                if (comparator(heap[rightGrandChildRight], heap[smallestIndex]))
+                if (comparator(_heap[rightGrandChildRight], _heap[smallestIndex]))
                 {
                     smallestIndex = rightGrandChildRight;
                     isGrandChild = true;
@@ -264,27 +280,27 @@ private:
 
         if (isGrandChild)
         {
-            if(comparator(heap[smallestIndex], heap[index]))
+            if(comparator(_heap[smallestIndex], _heap[index]))
             {
-                std::swap(heap[smallestIndex], heap[index]);
+                std::swap(_heap[smallestIndex], _heap[index]);
 
                 if (smallestIndex != 0)
                 {
-                    auto parentSmllestIndex = GetParentIndex(smallestIndex);
+                    auto parentSmallestIndex = GetParentIndex(smallestIndex);
 
-                    if (!comparator(heap[smallestIndex], heap[parentSmllestIndex]))
+                    if (!comparator(_heap[smallestIndex], _heap[parentSmallestIndex]))
                     {
-                        std::swap(heap[smallestIndex], heap[parentSmllestIndex]);
+                        std::swap(_heap[smallestIndex], _heap[parentSmallestIndex]);
                     }
 
-                    Heapify(heap, smallestIndex);
+                    Heapify(smallestIndex);
                 }
 
             }
         }
-        else if(comparator(heap[smallestIndex], heap[index]))
+        else if(comparator(_heap[smallestIndex], _heap[index]))
         {
-            std::swap(heap[smallestIndex], heap[index]);
+            std::swap(_heap[smallestIndex], _heap[index]);
         }
     }
 
@@ -293,7 +309,7 @@ private:
      * @param heap
      * @param index
      */
-    static void PushUp(std::vector<int>& heap, size_t index)
+    void PushUp(size_t index)
     {
         if (!IsRoot(index))
         {
@@ -301,42 +317,42 @@ private:
 
             if (IsMaxLevel(index))
             {
-                if (heap[index] < heap[indexParent])
+                if (_heap[index] < _heap[indexParent])
                 {
-                    std::swap(heap[index], heap[indexParent]);
-                    BubbleUp(heap, indexParent, minComparator);
+                    std::swap(_heap[index], _heap[indexParent]);
+                    BubbleUp(indexParent, minComparator);
                 }
                 else
                 {
-                    BubbleUp(heap, index, maxComparator);
+                    BubbleUp(index, maxComparator);
                 }
             }
             else
             {
-                if (heap[index] > heap[indexParent])
+                if (_heap[index] > _heap[indexParent])
                 {
-                    std::swap(heap[index], heap[indexParent]);
-                    BubbleUp(heap, indexParent, maxComparator);
+                    std::swap(_heap[index], _heap[indexParent]);
+                    BubbleUp(indexParent, maxComparator);
 
                 }
                 else
                 {
-                    BubbleUp(heap, index, minComparator);
+                    BubbleUp(index, minComparator);
                 }
             }
         }
     }
 
-    static void BubbleUp(std::vector<int>& heap, size_t index, std::function<bool (int, int)> comparator)
+    void BubbleUp(size_t index, std::function<bool (int, int)> comparator)
     {
         auto indexParent = GetParentIndex(index);
         if (!IsRoot(indexParent))
         {
             auto indexGrandParent = GetParentIndex(indexParent);
-            if (IsIndexExists(heap, indexGrandParent) && comparator(heap[index], heap[indexGrandParent]))
+            if (IsIndexExists(indexGrandParent) && comparator(_heap[index], _heap[indexGrandParent]))
             {
-                std::swap(heap[index], heap[indexGrandParent]);
-                BubbleUp(heap, indexGrandParent, comparator);
+                std::swap(_heap[index], _heap[indexGrandParent]);
+                BubbleUp(indexGrandParent, comparator);
             }
         }
     }
@@ -361,18 +377,14 @@ private:
         leftChildIndex = (index * 2) + 1;
     }
 
-    static inline void GetRightChildIndex(
-            size_t index,
-            size_t& rightChildIndex)
+    static inline void GetRightChildIndex(size_t index, size_t& rightChildIndex)
     {
         rightChildIndex = (index * 2) + 2;
     }
 
-    static bool inline IsIndexExists(
-            const std::vector<int>& heap,
-            size_t index)
+    bool inline IsIndexExists(size_t index) const
     {
-        return (index < heap.size());
+        return (index < _heap.size());
     }
 
     static inline bool IsMaxLevel(size_t index)
@@ -395,11 +407,11 @@ std::less_equal<int> MaxMinHeap::minComparator;
 
 
 //////////////////////////// Menu Functions //////////////////////////////////
-void HeapExtractMaxSelection(std::vector<int>& inputVec)
+void HeapExtractMaxSelection(MaxMinHeap& heap)
 {
     cout << "\nYou selected Heap Extract Max\n";
     int max;
-    if (MaxMinHeap::ExtractMax(inputVec, max))
+    if (heap.ExtractMax(max))
     {
         cout << "Max value was " << max << endl;
     }
@@ -409,11 +421,11 @@ void HeapExtractMaxSelection(std::vector<int>& inputVec)
     }
 }
 
-void HeapExtractMinSelection(std::vector<int>& inputVec)
+void HeapExtractMinSelection(MaxMinHeap& heap)
 {
     cout << "\nYou selected Heap Extract Min\n";
     int min;
-    if (MaxMinHeap::ExtractMin(inputVec, min))
+    if (heap.ExtractMin(min))
     {
         cout << "Min value was " << min << endl;
     }
@@ -423,7 +435,7 @@ void HeapExtractMinSelection(std::vector<int>& inputVec)
     }
 }
 
-void HeapInsertSelection(std::vector<int>& inputVec)
+void HeapInsertSelection(MaxMinHeap& heap)
 {
     cout << "\nYou selected Heap Insert\n";
     cout << "Please Insert The Value You Want To Insert\n";
@@ -434,13 +446,13 @@ void HeapInsertSelection(std::vector<int>& inputVec)
         cout << "Next time please enter valid number\n";
         return;
     }
-    MaxMinHeap::Insert(inputVec, inputInsert);
+    heap.Insert(inputInsert);
 }
 
-void HeapDeleteSelection(std::vector<int>& inputVec)
+void HeapDeleteSelection(MaxMinHeap& heap)
 {
     cout << "\nYou selected Heap Delete\n";
-    cout << "Please Insert The Index You Want To Delete - Range From 0 To " << inputVec.size() - 1 << endl;
+    cout << "Please Insert The Index You Want To Delete - Range From 0 To " << heap.GetSize() - 1 << endl;
     int inputIndex;
     cin >> inputIndex;
     if (!cin)
@@ -448,17 +460,13 @@ void HeapDeleteSelection(std::vector<int>& inputVec)
         cout << "Next time please enter valid number\n";
         return;
     }
-    if (!MaxMinHeap::Delete(inputVec, inputIndex))
+    if (!heap.Delete(inputIndex))
     {
-        if (inputVec.size() == 0)
-        {
-            cout << "The Heap Is Empty\n";
-        }
-        cout << "Please Try Again\n";
+        cout << "Failed to delete, please Try Again\n";
     }
 }
 
-bool HeapBuildSelection(std::vector<int>& outputVector)
+bool HeapBuildSelection(MaxMinHeap& heap, std::vector<int>& outputVector)
 {
     cout << "Please enter your array size\n";
     int inputSize;
@@ -483,7 +491,6 @@ bool HeapBuildSelection(std::vector<int>& outputVector)
         return false;
     }
 
-    auto validInput{true};
     std::vector<int> inputVec;
     cout << "Please enter " << inputSize << " numbers\n";
     for (auto i = 0; i < inputSize; ++i)
@@ -493,24 +500,17 @@ bool HeapBuildSelection(std::vector<int>& outputVector)
         if (!cin)
         {
             cout << "Next time please enter valid number\n";
-            validInput = false;
             return false;
         }
 
         inputVec.push_back(inputNumber);
     }
 
-    if (!validInput)
-    {
-        return false;
-    }
-
     cout << "\nYour input array is:\n";
-    MaxMinHeap::PrintHeap(inputVec);
+    heap.PrintHeap();
 
-    MaxMinHeap::BuildHeap(inputVec);
+    heap.BuildHeap(inputVec);
 
-    outputVector = std::move(inputVec);
     return true;
 }
 
@@ -520,9 +520,10 @@ int main()
     {
         cout << "Welcome to Ron Potashnik Max Min Heap\n";
 
+        MaxMinHeap heap;
         std::vector<int> inputVec;
 
-        if(!HeapBuildSelection(inputVec))
+        if(!HeapBuildSelection(heap, inputVec))
         {
             break;
         }
@@ -535,12 +536,10 @@ int main()
         cin >> inputSelect;
         if (inputSelect == 1)
         {
-            MaxMinHeap::BuildHeap(inputVec);
             while (true)
             {
                 cout << "\nYour MaxMin Heap is:\n";
-                MaxMinHeap::PrintHeap(inputVec);
-
+                heap.PrintHeap();
                 cout << "\nPlease enter:\n"
                         "1 - Heap Extract Max\n"
                         "2 - Heap Extract Min\n"
@@ -553,28 +552,28 @@ int main()
                 // Heap Extract Max
                 if (inputSelect == 1)
                 {
-                    HeapExtractMaxSelection(inputVec);
+                    HeapExtractMaxSelection(heap);
                 }
                 // Heap Extract Min
                 else if (inputSelect == 2)
                 {
-                    HeapExtractMinSelection(inputVec);
+                    HeapExtractMinSelection(heap);
                 }
                 //Heap Insert
                 else if (inputSelect == 3)
                 {
-                    HeapInsertSelection(inputVec);
+                    HeapInsertSelection(heap);
                 }
                 //Heap Delete
                 else if (inputSelect == 4)
                 {
-                    HeapDeleteSelection(inputVec);
+                    HeapDeleteSelection(heap);
                 }
-                //Heap Heapify
+                //Heap Build
                 else if (inputSelect == 5)
                 {
                     cout << "\nYou selected Heap Build\n";
-                    if (!HeapBuildSelection(inputVec))
+                    if (!HeapBuildSelection(heap, inputVec))
                     {
                         break;
                     }
