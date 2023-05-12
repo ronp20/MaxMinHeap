@@ -202,9 +202,9 @@ private:
 
         size_t leftChild, rightChild;
 
-        GetLeftChildIndex(index, leftChild);
+        leftChild = GetLeftChildIndex(index);
 
-        GetRightChildIndex(index,rightChild);
+        rightChild = GetRightChildIndex(index);
 
         //Check if the node have child's 
         if (!IsIndexExists(leftChild) &&
@@ -231,9 +231,9 @@ private:
             }
 
             size_t leftGrandChildLeft, leftGrandChildRight;
-            GetLeftChildIndex( leftChild, leftGrandChildLeft);
+            leftGrandChildLeft = GetLeftChildIndex( leftChild);
 
-            GetRightChildIndex(leftChild, leftGrandChildRight);
+            leftGrandChildRight = GetRightChildIndex(leftChild);
 
 
             if (IsIndexExists(leftGrandChildLeft))
@@ -255,9 +255,9 @@ private:
             }
 
             size_t rightGrandChildLeft, rightGrandChildRight;
-            GetLeftChildIndex(rightChild, rightGrandChildLeft);
+            rightGrandChildLeft = GetLeftChildIndex(rightChild);
 
-            GetRightChildIndex(rightChild, rightGrandChildRight);
+            rightGrandChildRight = GetRightChildIndex(rightChild);
 
             if (IsIndexExists(rightGrandChildLeft))
             {
@@ -372,14 +372,14 @@ private:
         return 0;
     }
 
-    static inline void GetLeftChildIndex(size_t index, size_t& leftChildIndex)
+    static inline size_t GetLeftChildIndex(size_t index)
     {
-        leftChildIndex = (index * 2) + 1;
+        return ((index * 2) + 1);
     }
 
-    static inline void GetRightChildIndex(size_t index, size_t& rightChildIndex)
+    static inline size_t GetRightChildIndex(size_t index)
     {
-        rightChildIndex = (index * 2) + 2;
+        return ((index * 2) + 2);
     }
 
     bool inline IsIndexExists(size_t index) const
